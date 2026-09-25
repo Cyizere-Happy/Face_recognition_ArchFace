@@ -10,7 +10,7 @@ environment to override the default without touching any script:
 
 import os
 
-DEFAULT_CAM_INDEX = 1
+DEFAULT_CAM_INDEX = 0
 
 
 def get_cam_index() -> int:
