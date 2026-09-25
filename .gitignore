@@ -6,3 +6,8 @@ face-recognition-5pt/data/enroll/
 face-recognition-5pt/data/debug_aligned/
 face-recognition-5pt/models/*.onnx
 face-recognition-5pt/models/*.task
+branch_structure.json
+temp_auto_push.bat
+temp_interactive_push.bat
+config.bat
+node_modules
