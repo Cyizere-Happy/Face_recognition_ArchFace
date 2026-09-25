@@ -15,6 +15,8 @@ import mediapipe as mp
 from mediapipe.tasks import python as mp_python
 from mediapipe.tasks.python import vision as mp_vision
 
+from .cam_config import get_cam_index
+
 IDX_LEFT_EYE = 33
 IDX_RIGHT_EYE = 263
 IDX_NOSE_TIP = 1

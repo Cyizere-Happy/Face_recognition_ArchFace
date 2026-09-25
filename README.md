@@ -78,6 +78,9 @@ care which board is actually running.
 │   │   ├── enroll.py            # multi-identity enrollment tool
 │   │   ├── evaluate.py          # threshold tuning (FAR/FRR sweep)
 │   │   ├── recognize.py         # full runtime loop: recognition + MQTT + turret logic
+│   │   ├── recognize_live.py    # software-only multi-face recognition (no MQTT / servo)
+│   │   ├── face_tracking.py     # target face locking (SEARCHING / LOCKED / LOST) + position signal
+│   │   ├── face_signals.py      # EAR, blink, eyes-closed, smile detection (MediaPipe landmarks)
 │   │   ├── haar_5pt.py          # detector + alignment math
 │   │   └── main.py              # ESP8266 firmware (flash to the board, don't run on desktop)
 │   ├── init_project.py
@@ -137,6 +140,31 @@ python -m src.evaluate      # tune the match threshold (needs 2+ identities)
 
 python -m src.recognize     # run the full scanner (needs the turret board online)
 ```
+
+### Software-only modes (no turret, no MQTT)
+
+```bash
+python -m src.recognize_live                    # multi-face recognition window
+python -m src.face_tracking --target <name>     # lock onto one enrolled person
+```
+
+`recognize_live` keys: `q` quit, `r` reload DB, `+`/`-` adjust the distance threshold,
+`d` toggle debug overlay.
+
+`face_tracking` finds the enrolled `--target` among all visible faces, locks on, and
+re-verifies identity every 10 frames. The state machine is
+`SEARCHING -> LOCKED -> LOST -> SEARCHING`; the lock survives short dropouts
+(24 frames) and follows the same face frame-to-frame by IoU + displacement. While
+locked it shows:
+
+- a smoothed position signal (`H=LEFT/CENTER/RIGHT`, `V=UP/CENTER/DOWN`, plus the
+  normalized error) with a dead zone in the middle of the frame;
+- facial-expression analysis: `SMILE` / `NEUTRAL`, `EYES OPEN` / `EYES CLOSED`,
+  a running blink count, the eye aspect ratio (EAR) and a smile confidence.
+
+Options: `--target <name>` (required), `--camera <index>` (defaults to
+`FALCON_CAM_INDEX`, then falls back to 1, 0, 2), `--threshold <dist>` (default 0.81;
+tune it with `python -m src.evaluate` for your own enrolled people).
 
 Flash the turret firmware (`src/main.py` on an ESP8266, or `sketch_sep11a.ino` on an
 ESP32) and make sure it's connected to the same MQTT broker before starting
